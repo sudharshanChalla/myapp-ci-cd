@@ -29,9 +29,9 @@ jobs:
         run: docker build -t myapp:${{ github.sha }} .
 
       - name: Warmup artifact
-        run: echo "run $GITHUB_RUN_ID" > hello-1234.txt
+        run: echo "run $GITHUB_RUN_ID" > hello-9711.txt
 
       - uses: actions/upload-artifact@v4
         with:
-          name: hello-1234
-          path: hello-1234.txt
+          name: hello-9711
+          path: hello-9711.txt
