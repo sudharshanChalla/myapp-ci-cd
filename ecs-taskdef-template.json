@@ -1,9 +1,10 @@
 {
   "family": "myapp-task",
   "networkMode": "awsvpc",
+  "executionRoleArn": "arn:aws:iam::779846785601:role/myapp-task-execution-role", 
   "containerDefinitions": [
     {
-      "name": "myapp",
+      "name": "myapp-container",
       "image": "IMAGE_URI",
       "essential": true,
       "portMappings": [
@@ -16,6 +17,5 @@
   ],
   "requiresCompatibilities": ["FARGATE"],
   "cpu": "1024",
-  "memory": "2048",
-  "executionRoleArn": "arn:aws:iam::779846785601:role/GitHubActionsECSRole"
+  "memory": "2048"
 }
