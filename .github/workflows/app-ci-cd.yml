@@ -36,46 +36,44 @@ jobs:
           name: hello-9711
           path: hello-9711.txt
 
- deploy:
-  needs: build-test
-  if: github.ref == 'refs/heads/main'
-  runs-on: ubuntu-latest
-  permissions:
-    id-token: write
-    contents: read
-  env:
-    AWS_REGION: us-east-1
-    ECR_REPO: myapp-repo
-    ECS_CLUSTER: myapp-cluster
-    ECS_SERVICE: myapp-service
-  steps:
-    - uses: actions/checkout@v4
+  deploy:
+    needs: build-test
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+    env:
+      AWS_REGION: us-east-1
+      ECR_REPO: myapp-repo
+      ECS_CLUSTER: myapp-cluster
+      ECS_SERVICE: myapp-service
+    steps:
+      - uses: actions/checkout@v4
 
-    - name: Configure AWS (OIDC)
-      uses: aws-actions/configure-aws-credentials@v4
-      with:
-        role-to-assume: arn:aws:iam::779846785601:role/GitHubActionsECSRole
-        aws-region: ${{ env.AWS_REGION }}
+      - name: Configure AWS (OIDC)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::779846785601:role/GitHubActionsECSRole
+          aws-region: ${{ env.AWS_REGION }}
 
-    - name: Login to ECR
-      id: ecr
-      uses: aws-actions/amazon-ecr-login@v2
+      - name: Login to ECR
+        uses: aws-actions/amazon-ecr-login@v2
 
-    - name: Build & Push Docker image
-      run: |
-        SHA=$(git rev-parse --short HEAD)
-        ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
-        REGISTRY="${ACCOUNT_ID}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com"
-        IMAGE="${REGISTRY}/${{ env.ECR_REPO }}:${SHA}-9711"
-        docker build -t "$IMAGE" .
-        docker push "$IMAGE"
-        echo "IMAGE=$IMAGE" >> $GITHUB_ENV
+      - name: Build & Push Docker image
+        run: |
+          SHA=$(git rev-parse --short HEAD)
+          ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
+          REGISTRY="${ACCOUNT_ID}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com"
+          IMAGE="${REGISTRY}/${{ env.ECR_REPO }}:${SHA}-9711"
+          docker build -t "$IMAGE" .
+          docker push "$IMAGE"
+          echo "IMAGE=$IMAGE" >> $GITHUB_ENV
 
-    - name: Deploy to ECS
-      uses: aws-actions/amazon-ecs-deploy-task-definition@v2
-      with:
-        task-definition: ecs-taskdef-template.json
-        service: ${{ env.ECS_SERVICE }}
-        cluster: ${{ env.ECS_CLUSTER }}
-        wait-for-service-stability: true
-
+      - name: Deploy to ECS
+        uses: aws-actions/amazon-ecs-deploy-task-definition@v2
+        with:
+          task-definition: ecs-taskdef-template.json
+          service: ${{ env.ECS_SERVICE }}
+          cluster: ${{ env.ECS_CLUSTER }}
+          wait-for-service-stability: true
