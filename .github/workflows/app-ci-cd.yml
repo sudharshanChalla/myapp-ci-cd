@@ -49,7 +49,8 @@ jobs:
       ECS_CLUSTER: myapp-cluster
       ECS_SERVICE: myapp-service
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
 
       - name: Configure AWS (OIDC)
         uses: aws-actions/configure-aws-credentials@v4
@@ -74,6 +75,13 @@ jobs:
       - name: Render task definition with new image
         run: |
           sed "s|IMAGE_URI|${IMAGE}|g" ecs-taskdef-template.json > taskdef.json
+          echo "=== rendered taskdef.json ==="
+          cat taskdef.json
+      - name: Upload rendered taskdef for debugging
+        uses: actions/upload-artifact@v4
+        with:
+          name: rendered-taskdef
+          path: taskdef.json
 
       - name: Deploy to ECS
         uses: aws-actions/amazon-ecs-deploy-task-definition@v2
