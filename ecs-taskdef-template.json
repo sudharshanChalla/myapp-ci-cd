@@ -1,0 +1,21 @@
+{
+  "family": "myapp-task",
+  "networkMode": "awsvpc",
+  "containerDefinitions": [
+    {
+      "name": "myapp",
+      "image": "IMAGE_URI",
+      "essential": true,
+      "portMappings": [
+        {
+          "containerPort": 80,
+          "protocol": "tcp"
+        }
+      ]
+    }
+  ],
+  "requiresCompatibilities": ["FARGATE"],
+  "cpu": "1024",
+  "memory": "2048",
+  "executionRoleArn": "arn:aws:iam::779846785601:role/GitHubActionsECSRole"
+}
