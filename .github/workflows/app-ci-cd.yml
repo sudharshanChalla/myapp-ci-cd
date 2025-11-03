@@ -62,6 +62,7 @@ jobs:
 
       - name: Build & Push Docker image
         run: |
+          set -euo pipefail
           SHA=$(git rev-parse --short HEAD)
           ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
           REGISTRY="${ACCOUNT_ID}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com"
@@ -70,10 +71,14 @@ jobs:
           docker push "$IMAGE"
           echo "IMAGE=$IMAGE" >> $GITHUB_ENV
 
+      - name: Render task definition with new image
+        run: |
+          sed "s|IMAGE_URI|${IMAGE}|g" ecs-taskdef-template.json > taskdef.json
+
       - name: Deploy to ECS
         uses: aws-actions/amazon-ecs-deploy-task-definition@v2
         with:
-          task-definition: ecs-taskdef-template.json
+          task-definition: taskdef.json
           service: ${{ env.ECS_SERVICE }}
           cluster: ${{ env.ECS_CLUSTER }}
           wait-for-service-stability: true
